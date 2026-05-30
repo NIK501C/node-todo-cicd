@@ -39,6 +39,7 @@ pipeline {
         stage("Deploy"){
             steps{
                 echo "This stage is deploying"
+                echo "Finished Jenkinsfile"
             }
         }
     }
