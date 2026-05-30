@@ -1,34 +1,44 @@
-pipeline{
-    agent { label 'dev-server' }
-    
+@Library("Shared") _
+pipeline {
+    agent {label "vinod"}
     stages{
-        stage("Code Clone"){
+        stage("Hello"){
             steps{
-                echo "Code Clone Stage"
-                git url: "https://github.com/LondheShubham153/node-todo-cicd.git", branch: "master"
-            }
-        }
-        stage("Code Build & Test"){
-            steps{
-                echo "Code Build Stage"
-                sh "docker build -t node-app ."
-            }
-        }
-        stage("Push To DockerHub"){
-            steps{
-                withCredentials([usernamePassword(
-                    credentialsId:"dockerHubCreds",
-                    usernameVariable:"dockerHubUser", 
-                    passwordVariable:"dockerHubPass")]){
-                sh 'echo $dockerHubPass | docker login -u $dockerHubUser --password-stdin'
-                sh "docker image tag node-app:latest ${env.dockerHubUser}/node-app:latest"
-                sh "docker push ${env.dockerHubUser}/node-app:latest"
+                script{
+                    hello()
                 }
+            }
+        }
+        stage("Clone Code"){
+            steps{
+                script{
+                    clone("https://github.com/NIK501C/node-todo-cicd.git","master")
+                }
+            }
+        }
+        stage("Build"){
+           steps{
+                script{
+                    build("node-groovy")
+                }
+           }
+        }
+        stage("Push"){
+            steps{
+                script{
+                    push("node-groovy")
+                }
+            }
+        }
+        stage("Test"){
+            steps{
+                echo "This stage is testing"
+                sh "sudo docker run -d -p 8000:8000 node-groovy:latest"
             }
         }
         stage("Deploy"){
             steps{
-                sh "docker compose down && docker compose up -d --build"
+                echo "This stage is deploying"
             }
         }
     }
